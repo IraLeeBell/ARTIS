@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flask File Upload with Progress</title>
+  <!-- Bootstrap CSS (using CDN for simplicity) -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+  
+  <!-- Optional: your own CSS styles can go here -->
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <h1 class="mb-4">File Uploader</h1>
+    
+    <!-- Upload Section -->
+    <div class="card p-4 mb-4">
+      <h3>Select one or more files to upload:</h3>
+      <div class="mb-3">
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          class="form-control"
+        />
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-3">
+        <div class="progress" style="height: 25px;">
+          <div
+            id="uploadProgressBar"
+            class="progress-bar"
+            role="progressbar"
+            style="width: 0%"
+            aria-valuenow="0"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            0%
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Button -->
+      <button id="uploadBtn" class="btn btn-primary">Upload</button>
+    </div>
+
+    <!-- File List Section -->
+    <div class="card p-4">
+      <h3>Files in Upload Folder:</h3>
+      <ul id="fileList" class="list-group">
+        {% if files %}
+          {% for f in files %}
+            <li class="list-group-item">{{ f }}</li>
+          {% else %}
+            <li class="list-group-item">No files uploaded yet.</li>
+          {% endfor %}
+        {% else %}
+          <li class="list-group-item">No files uploaded yet.</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Our main JS logic -->
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
