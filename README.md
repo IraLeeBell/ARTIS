@@ -1,6 +1,6 @@
 # ARTIS
 
-![artis logo](https://github.com/IraLeeBell/ARTIS/blob/main/ARTIS/static/images/artis-logo.webp)
+![artis logo](https://github.com/IraLeeBell/ARTIS/blob/main/ARTIS/static/images/artis-logo.webp | width=25)
 
 ARTIS - Azure Resource Toolkit for Intelligent Systems
 
