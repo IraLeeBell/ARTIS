@@ -43,7 +43,12 @@
         </li>
         <!-- Future menu items can go here -->
         <li class="nav-item">
-          <a class="nav-link" href="#">Another Page (TBD)</a>
+          <a 
+            class="nav-link {% if request.endpoint == 'computervision_page' %}active{% endif %}" 
+            href="{{ url_for('computervision_page') }}"
+          >
+            Computer Vision
+          </a>
         </li>
       </ul>
     </nav>
