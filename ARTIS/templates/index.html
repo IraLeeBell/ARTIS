@@ -2,91 +2,133 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Flask File Upload with Progress</title>
-  <!-- Bootstrap CSS (using CDN for simplicity) -->
+  <title>Flask File Upload with Pagination</title>
+  <!-- Bootstrap CSS -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
   />
 </head>
-<body class="bg-light">
-  <div class="container my-5">
-    <h1 class="mb-4">File Uploader</h1>
-    
-    <!-- Upload Section -->
-    <div class="card p-4 mb-4">
-      <h3>Select one or more files to upload:</h3>
-      <div class="mb-3">
-        <input
-          type="file"
-          id="fileInput"
-          multiple
-          class="form-control"
-        />
-      </div>
+<body>
 
-      <!-- Progress Bar -->
-      <div class="mb-3">
-        <div class="progress" style="height: 25px;">
-          <div
-            id="uploadProgressBar"
-            class="progress-bar"
-            role="progressbar"
-            style="width: 0%"
-            aria-valuenow="0"
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            0%
+<div class="container-fluid">
+  <!-- Header with logo -->
+  <div class="row bg-secondary p-3 align-items-center">
+    <!-- Logo column -->
+    <div class="col-auto">
+      <!-- Adjust width/height as needed with inline styles or CSS classes -->
+      <img 
+        src="{{ url_for('static', filename='images/artis-logo.webp') }}" 
+        alt="Artis Logo" 
+        style="max-height: 50px;"
+      />
+    </div>
+    <!-- Optional text or space next to logo -->
+    <div class="col text-white">
+      <!-- If you want a brand name or slogan here, put it. Otherwise leave blank -->
+      <h5 class="mb-0">Azure Resource Toolkit for Intelligent Systems</h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Left Menu -->
+    <nav class="col-12 col-md-2 bg-light p-3 border-end" style="min-height: 100vh;">
+      <h5 class="mb-3">Menu</h5>
+      <ul class="nav flex-column">
+        <!-- "File Uploader" as first menu item -->
+        <li class="nav-item">
+          <a class="nav-link active" href="#">
+            File Uploader
+          </a>
+        </li>
+        <!-- Future menu items can go here -->
+        <li class="nav-item">
+          <a class="nav-link" href="#">Another Page (TBD)</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="col-12 col-md-10 p-4">
+      <!-- REPLACING your old "h1" with the new layout. -->
+
+      <!-- Upload Section -->
+      <div class="card p-4 mb-4">
+        <h3>Select one or more files to upload:</h3>
+        <div class="mb-3">
+          <input
+            type="file"
+            id="fileInput"
+            multiple
+            class="form-control"
+          />
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-3">
+          <div class="progress" style="height: 25px;">
+            <div
+              id="uploadProgressBar"
+              class="progress-bar"
+              role="progressbar"
+              style="width: 0%"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              0%
+            </div>
           </div>
         </div>
+
+        <!-- Upload Button -->
+        <button id="uploadBtn" class="btn btn-primary">Upload</button>
       </div>
 
-      <!-- Upload Button -->
-      <button id="uploadBtn" class="btn btn-primary">Upload</button>
-    </div>
+      <!-- File List Section -->
+      <div class="card p-4">
+        <h3>Files in Upload Container:</h3>
+        <ul id="fileList" class="list-group"></ul>
 
-    <!-- File List Section -->
-    <div class="card p-4">
-      <h3>Files in Upload Folder:</h3>
-      <ul id="fileList" class="list-group"></ul>
-
-      <!-- Pagination Controls -->
-      <div class="mt-3 d-flex justify-content-between" id="paginationControls" style="display: none;">
-        <button id="prevPageBtn" class="btn btn-secondary">Previous</button>
-        <button id="nextPageBtn" class="btn btn-secondary">Next</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap Toast container (top-right) -->
-  <div class="toast-container position-fixed top-0 end-0 p-3">
-    <div 
-      id="statusToast" 
-      class="toast align-items-center text-bg-primary border-0" 
-      role="alert" 
-      aria-live="assertive" 
-      aria-atomic="true"
-      data-bs-autohide="true" 
-      data-bs-delay="5000"
-    >
-      <div class="d-flex">
-        <div id="statusToastBody" class="toast-body">
-          <!-- Filled dynamically by JS -->
+        <!-- Pagination Controls -->
+        <div class="mt-3 d-flex justify-content-between" id="paginationControls" style="display: none;">
+          <button id="prevPageBtn" class="btn btn-secondary">Previous</button>
+          <button id="nextPageBtn" class="btn btn-secondary">Next</button>
         </div>
-        <button 
-          type="button" 
-          class="btn-close btn-close-white me-2 m-auto" 
-          data-bs-dismiss="toast" 
-          aria-label="Close"
-        ></button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Bootstrap JS (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Our main JS logic -->
-  <script src="{{ url_for('static', filename='main.js') }}"></script>
+<!-- Bootstrap Toast container (top-right) -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <div
+    id="statusToast"
+    class="toast align-items-center text-bg-primary border-0"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-autohide="true"
+    data-bs-delay="5000"
+  >
+    <div class="d-flex">
+      <div id="statusToastBody" class="toast-body">
+        <!-- Filled dynamically by JS -->
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Your main JS logic -->
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+
 </body>
 </html>
