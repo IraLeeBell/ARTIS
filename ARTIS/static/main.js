@@ -3,32 +3,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadBtn = document.getElementById("uploadBtn");
   const progressBar = document.getElementById("uploadProgressBar");
   const fileList = document.getElementById("fileList");
+  const prevPageBtn = document.getElementById("prevPageBtn");
+  const nextPageBtn = document.getElementById("nextPageBtn");
+  const paginationControls = document.getElementById("paginationControls");
 
-  // Bootstrap toast elements
+  // Toast elements
   const statusToastEl = document.getElementById("statusToast");
   const statusToastBodyEl = document.getElementById("statusToastBody");
   const statusToast = new bootstrap.Toast(statusToastEl);
 
-  // Function to show the toast notification
+  // Track current page in JS
+  let currentPage = 1;
+  let totalFiles = 0;
+  let pageSize = 20;
+
+  // Show the toast notification
   function showToast(message) {
     statusToastBodyEl.textContent = message;
     statusToast.show();
   }
 
-  // Function to refresh the file list in the UI
-  function refreshFileList() {
-    fetch("/files")
+  // Refresh the file list for the current page
+  function refreshFileList(page = 1) {
+    fetch(`/files?page=${page}`)
       .then((response) => response.json())
-      .then((files) => {
+      .then((data) => {
+        const files = data.files;
+        totalFiles = data.total_files;
+        pageSize = data.page_size;
+        currentPage = data.current_page;
+
         // Clear existing items
         fileList.innerHTML = "";
 
+        // Build list
         if (files.length > 0) {
           files.forEach((filename) => {
             const li = document.createElement("li");
             li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
 
-            // File name span
+            // File name
             const span = document.createElement("span");
             span.textContent = filename;
             li.appendChild(span);
@@ -55,27 +69,28 @@ document.addEventListener("DOMContentLoaded", () => {
           li.textContent = "No files uploaded yet.";
           fileList.appendChild(li);
         }
+
+        // Update pagination controls
+        updatePaginationControls();
       })
       .catch((err) => {
         console.error("Error fetching file list:", err);
+        showToast(`Error fetching file list: ${err}`);
       });
   }
 
-  // Function to delete a file
-  window.deleteFile = function (filename) {
+  // Delete a file
+  function deleteFile(filename) {
     fetch("/delete", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ filename: filename }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message) {
-          // Successfully deleted
           showToast(data.message);
-          refreshFileList();
+          refreshFileList(currentPage);
         } else if (data.error) {
           showToast(`Error: ${data.error}`);
         }
@@ -83,9 +98,42 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => {
         showToast(`Error: ${err}`);
       });
-  };
+  }
 
-  // Event handler for the Upload button
+  // Update pagination buttons (Prev/Next)
+  function updatePaginationControls() {
+    // If no files, hide pagination entirely
+    if (totalFiles === 0) {
+      paginationControls.style.display = "none";
+      return;
+    }
+    paginationControls.style.display = "flex";
+
+    // Determine if there's a next page
+    const totalPages = Math.ceil(totalFiles / pageSize);
+
+    // If we're on page 1, disable previous
+    prevPageBtn.disabled = (currentPage <= 1);
+    // If we're on last page, disable next
+    nextPageBtn.disabled = (currentPage >= totalPages);
+  }
+
+  // Event handlers for pagination buttons
+  prevPageBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      refreshFileList(currentPage - 1);
+    }
+  });
+
+  nextPageBtn.addEventListener("click", () => {
+    // Check total pages
+    const totalPages = Math.ceil(totalFiles / pageSize);
+    if (currentPage < totalPages) {
+      refreshFileList(currentPage + 1);
+    }
+  });
+
+  // Handle file upload
   uploadBtn.addEventListener("click", () => {
     const files = fileInput.files;
     if (!files.length) {
@@ -93,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Reset the progress bar
+    // Reset progress bar
     progressBar.style.width = "0%";
     progressBar.textContent = "0%";
     progressBar.setAttribute("aria-valuenow", 0);
@@ -106,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create XHR and track progress
     const xhr = new XMLHttpRequest();
-
     xhr.upload.addEventListener("progress", (e) => {
       if (e.lengthComputable) {
         const percentComplete = Math.round((e.loaded / e.total) * 100);
@@ -118,13 +165,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 200) {
-        // Upload complete - refresh file list
-        refreshFileList();
-
-        // Show toast instead of alert
+        // Upload complete - refresh file list on the same page
+        refreshFileList(currentPage);
         showToast("File(s) uploaded successfully!");
-
-        // Optionally reset file input
+        // Reset file input
         fileInput.value = "";
         // Reset progress bar
         progressBar.style.width = "0%";
@@ -137,6 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
     xhr.send(formData);
   });
 
-  // Initial load of file list
-  refreshFileList();
+  // On initial load, fetch page 1
+  refreshFileList(1);
 });
